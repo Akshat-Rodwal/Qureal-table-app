@@ -1,18 +1,75 @@
-// import React, { useState } from "react";
-// import {
-//   useReactTable,
-//   getCoreRowModel,
-//   flexRender,
-// } from "@tanstack/react-table";
+// import React, { useState, useEffect, useRef } from "react";
+// import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 
-// const TableComponent = ({ data, columns }) => {
-//   const [tableData, setTableData] = useState(data || []);
-//   const [tableColumns, setTableColumns] = useState(columns || []);
-//   const [showCheckboxes, setShowCheckboxes] = useState(false);
+// const TableComponent = ({ value, onChange }) => {
+//   const [tableData, setTableData] = useState(
+//     value.data || [
+//       { id: 1, name: "John Doe", age: 28 },
+//       { id: 2, name: "Jane Smith", age: 32 },
+//     ]
+//   ); // Default data if no data is passed from parent
+
+//   const [tableColumns, setTableColumns] = useState(
+//     value.columns || [
+//       { accessorKey: "id", header: "ID", width: 150 },
+//       { accessorKey: "name", header: "Name", width: 150 },
+//       { accessorKey: "age", header: "Age", width: 100 },
+//     ]
+//   );
+//   // Default columns if no columns are passed from parent
+
+//   const [showRowCheckboxes, setShowRowCheckboxes] = useState(false); // Toggle for row checkboxes
+//   const [showColumnCheckboxes, setShowColumnCheckboxes] = useState(false); // Toggle for column checkboxes
 //   const [selectedRows, setSelectedRows] = useState(new Set());
-//   const [selectedCell, setSelectedCell] = useState(null);
+//   const [selectedColumnsForRemoval, setSelectedColumnsForRemoval] = useState(
+//     new Set()
+//   );
+//   const [selectedCell, setSelectedCell] = useState(null); // Track selected cell
 //   const [textColor, setTextColor] = useState("#000000");
 //   const [bgColor, setBgColor] = useState("#ffffff");
+//   const [cellStyles, setCellStyles] = useState({});
+
+//   // Handle column resizing
+//   const resizingColumn = useRef(null);
+//   const startX = useRef(0);
+//   const startWidth = useRef(0);
+
+//   const handleMouseDown = (e, columnIndex) => {
+//     e.preventDefault();
+//     resizingColumn.current = columnIndex;
+//     startX.current = e.clientX;
+//     startWidth.current = tableColumns[columnIndex].width;
+//     document.addEventListener("mousemove", handleMouseMove);
+//     document.addEventListener("mouseup", handleMouseUp);
+//   };
+
+//   const handleMouseMove = (e) => {
+//     if (resizingColumn.current === null) return;
+
+//     const diff = e.clientX - startX.current;
+//     const newWidth = startWidth.current + diff;
+//     if (newWidth > 10) {
+//       const updatedColumns = [...tableColumns];
+//       updatedColumns[resizingColumn.current] = {
+//         ...updatedColumns[resizingColumn.current],
+//         width: newWidth,
+//       };
+//       setTableColumns(updatedColumns);
+//     }
+//   };
+
+//   const handleMouseUp = () => {
+//     resizingColumn.current = null;
+//     document.removeEventListener("mousemove", handleMouseMove);
+//     document.removeEventListener("mouseup", handleMouseUp);
+//   };
+
+//   // Update the parent value prop when local state changes
+//   useEffect(() => {
+//     if (onChange) {
+//       onChange({ data: tableData, columns: tableColumns }); // Send updated data and columns to parent
+//     }
+//   }, [tableData, tableColumns, onChange]); // Only trigger on table data or column change
 
 //   const table = useReactTable({
 //     data: tableData,
@@ -20,12 +77,14 @@
 //     getCoreRowModel: getCoreRowModel(),
 //   });
 
+//   // Edit a cell's value
 //   const handleCellEdit = (rowIndex, columnId, value) => {
 //     const updatedData = [...tableData];
 //     updatedData[rowIndex] = { ...updatedData[rowIndex], [columnId]: value };
 //     setTableData(updatedData);
 //   };
 
+//   // Add a new row
 //   const addRow = () => {
 //     const newRow = tableColumns.reduce((acc, col) => {
 //       acc[col.accessorKey] = "";
@@ -34,25 +93,29 @@
 //     setTableData([...tableData, newRow]);
 //   };
 
+//   // Add a new column
 //   const addColumn = () => {
 //     const newColumnKey = `column${tableColumns.length + 1}`;
 //     const newColumn = {
 //       accessorKey: newColumnKey,
 //       header: newColumnKey,
+//       width: 150,
 //     };
 //     setTableColumns([...tableColumns, newColumn]);
-//     setTableData(tableData.map(row => ({ ...row, [newColumnKey]: "" })));
+//     setTableData(tableData.map((row) => ({ ...row, [newColumnKey]: "" })));
 //   };
 
-//   const toggleRemoveMode = () => {
-//     if (showCheckboxes) {
+//   // Toggle row selection mode
+//   const toggleRowRemoveMode = () => {
+//     if (showRowCheckboxes) {
 //       setTableData(tableData.filter((_, index) => !selectedRows.has(index)));
 //       setSelectedRows(new Set());
 //     }
-//     setShowCheckboxes(!showCheckboxes);
+//     setShowRowCheckboxes(!showRowCheckboxes);
 //   };
 
-//   const handleCheckboxChange = (index) => {
+//   // Handle row selection for removal
+//   const handleRowCheckboxChange = (index) => {
 //     const updatedSelection = new Set(selectedRows);
 //     if (updatedSelection.has(index)) {
 //       updatedSelection.delete(index);
@@ -62,45 +125,86 @@
 //     setSelectedRows(updatedSelection);
 //   };
 
+//   // Toggle column selection mode
+//   const toggleColumnRemoveMode = () => {
+//     setShowColumnCheckboxes(!showColumnCheckboxes);
+//     setSelectedColumnsForRemoval(new Set());
+//   };
+
+//   // Handle column selection for removal
+//   const handleColumnCheckboxChange = (columnId) => {
+//     const updatedSelection = new Set(selectedColumnsForRemoval);
+//     if (updatedSelection.has(columnId)) {
+//       updatedSelection.delete(columnId);
+//     } else {
+//       updatedSelection.add(columnId);
+//     }
+//     setSelectedColumnsForRemoval(updatedSelection);
+//   };
+
+//   // Remove selected columns from table
+//   const removeSelectedColumns = () => {
+//     const columnsToRemove = Array.from(selectedColumnsForRemoval);
+
+//     const updatedColumns = tableColumns.filter(
+//       (col) => !columnsToRemove.includes(col.accessorKey)
+//     );
+
+//     const updatedData = tableData.map((row) => {
+//       const updatedRow = { ...row };
+//       columnsToRemove.forEach((colId) => {
+//         delete updatedRow[colId];
+//       });
+//       return updatedRow;
+//     });
+
+//     setTableColumns(updatedColumns);
+//     setTableData(updatedData);
+//     setSelectedColumnsForRemoval(new Set()); // Clear selection after removal
+//   };
+
+//   // Handle click on a cell to apply color styles
 //   const handleCellClick = (rowIndex, columnId) => {
 //     setSelectedCell({ rowIndex, columnId });
 //   };
 
+//   // Apply text color
 //   const applyTextColor = () => {
 //     if (selectedCell) {
 //       const { rowIndex, columnId } = selectedCell;
-//       const updatedData = [...tableData];
-//       updatedData[rowIndex] = {
-//         ...updatedData[rowIndex],
-//         [`${columnId}_textColor`]: textColor,
+//       const newStyles = { ...cellStyles };
+//       newStyles[`${rowIndex}-${columnId}`] = {
+//         ...newStyles[`${rowIndex}-${columnId}`],
+//         color: textColor, // Apply text color only
 //       };
-//       setTableData(updatedData);
+//       setCellStyles(newStyles);
 //     }
 //   };
 
+//   // Apply background color
 //   const applyBgColor = () => {
 //     if (selectedCell) {
 //       const { rowIndex, columnId } = selectedCell;
-//       const updatedData = [...tableData];
-//       updatedData[rowIndex] = {
-//         ...updatedData[rowIndex],
-//         [`${columnId}_bgColor`]: bgColor,
+//       const newStyles = { ...cellStyles };
+//       newStyles[`${rowIndex}-${columnId}`] = {
+//         ...newStyles[`${rowIndex}-${columnId}`],
+//         backgroundColor: bgColor, // Apply background color only
 //       };
-//       setTableData(updatedData);
+//       setCellStyles(newStyles);
 //     }
 //   };
 
-//   const handleColumnEdit = (index, value) => {
+//   // Handle column header editing
+//   const handleColumnHeaderEdit = (index, value) => {
 //     const updatedColumns = [...tableColumns];
 //     updatedColumns[index] = { ...updatedColumns[index], header: value };
 //     setTableColumns(updatedColumns);
 //   };
 
 //   return (
-//     <div className="w-screen h-screen p-4 flex flex-col items-center bg-gray-100">
+//     <div className="p-4" style={{ position: "absolute", top: "0", left: "0" }}>
 //       {/* Controls */}
 //       <div className="mb-4 flex gap-4 border p-2">
-
 //         <input
 //           type="color"
 //           value={textColor}
@@ -137,29 +241,78 @@
 //         >
 //           Add Column
 //         </button>
+//         {/* Row Removal Toggle */}
 //         <button
-//           onClick={toggleRemoveMode}
+//           onClick={toggleRowRemoveMode}
 //           className={`px-4 py-2 rounded-lg shadow ${
-//             showCheckboxes ? "bg-red-500 text-white" : "bg-gray-500 text-white"
+//             showRowCheckboxes
+//               ? "bg-red-500 text-white"
+//               : "bg-gray-500 text-white"
 //           }`}
 //         >
-//           {showCheckboxes ? "Confirm Remove" : "Remove Row"}
+//           {showRowCheckboxes ? "Confirm Remove Row" : "Remove Row"}
+//         </button>
+//         {/* Column Removal Toggle */}
+//         <button
+//           onClick={toggleColumnRemoveMode}
+//           className={`px-4 py-2 rounded-lg shadow ${
+//             showColumnCheckboxes
+//               ? "bg-red-500 text-white"
+//               : "bg-gray-500 text-white"
+//           }`}
+//         >
+//           {showColumnCheckboxes ? "Confirm Remove Column" : "Remove Column"}
 //         </button>
 //       </div>
 
 //       {/* Table */}
-//       <div className="w-full overflow-x-auto">
-//         <table className="w-full border-collapse border border-black">
+//       <div className="overflow-x-auto w-full">
+//         <table className="table-auto border-collapse border border-black w-auto">
 //           <thead>
+//             {/* Column Selection Checkboxes */}
+//             {showColumnCheckboxes && (
+//               <tr className="bg-gray-200">
+//                 {tableColumns.map((col) => (
+//                   <th key={col.accessorKey} className="border p-2">
+//                     <input
+//                       type="checkbox"
+//                       checked={selectedColumnsForRemoval.has(col.accessorKey)}
+//                       onChange={() =>
+//                         handleColumnCheckboxChange(col.accessorKey)
+//                       }
+//                     />
+//                   </th>
+//                 ))}
+//               </tr>
+//             )}
+//             {/* Editable Column Headers */}
 //             <tr className="bg-gray-200">
-//               {showCheckboxes && <th className="border p-2">Select</th>}
+//               {showRowCheckboxes && (
+//                 <th className="border p-2 text-center">
+//                   <input type="checkbox" className="cursor-pointer" />
+//                 </th>
+//               )}
 //               {tableColumns.map((col, index) => (
-//                 <th key={col.accessorKey} className="border p-2">
+//                 <th
+//                   key={col.accessorKey}
+//                   className="border p-2 relative"
+//                   style={{ width: `${col.width}px` }}
+//                 >
 //                   <input
 //                     type="text"
 //                     value={col.header}
-//                     onChange={(e) => handleColumnEdit(index, e.target.value)}
+//                     onChange={(e) =>
+//                       handleColumnHeaderEdit(index, e.target.value)
+//                     }
 //                     className="w-full bg-transparent border-none focus:outline-none"
+//                   />
+//                   <div
+//                     className="absolute right-0 top-0 bottom-0 cursor-ew-resize"
+//                     style={{
+//                       width: "5px",
+//                       backgroundColor: "transparent",
+//                     }}
+//                     onMouseDown={(e) => handleMouseDown(e, index)}
 //                   />
 //                 </th>
 //               ))}
@@ -169,25 +322,40 @@
 //             {tableData.length > 0 ? (
 //               tableData.map((row, rowIndex) => (
 //                 <tr key={rowIndex}>
-//                   {showCheckboxes && (
+//                   {/* Row Selection Checkbox */}
+//                   {showRowCheckboxes && (
 //                     <td className="border p-2 text-center">
 //                       <input
 //                         type="checkbox"
 //                         checked={selectedRows.has(rowIndex)}
-//                         onChange={() => handleCheckboxChange(rowIndex)}
+//                         onChange={() => handleRowCheckboxChange(rowIndex)}
 //                       />
 //                     </td>
 //                   )}
+//                   {/* Table Data Cells */}
 //                   {tableColumns.map((col) => (
 //                     <td
 //                       key={col.accessorKey}
-//                       className="border p-2 cursor-pointer"
+//                       className={`border p-2 cursor-pointer ${
+//                         selectedCell &&
+//                         selectedCell.rowIndex === rowIndex &&
+//                         selectedCell.columnId === col.accessorKey
+//                           ? "bg-blue-100"
+//                           : ""
+//                       }`}
+//                       style={cellStyles[`${rowIndex}-${col.accessorKey}`] || {}}
 //                       onClick={() => handleCellClick(rowIndex, col.accessorKey)}
 //                     >
 //                       <input
 //                         type="text"
 //                         value={row[col.accessorKey] || ""}
-//                         onChange={(e) => handleCellEdit(rowIndex, col.accessorKey, e.target.value)}
+//                         onChange={(e) =>
+//                           handleCellEdit(
+//                             rowIndex,
+//                             col.accessorKey,
+//                             e.target.value
+//                           )
+//                         }
 //                         className="w-full bg-transparent border-none focus:outline-none"
 //                       />
 //                     </td>
@@ -196,7 +364,7 @@
 //               ))
 //             ) : (
 //               <tr>
-//                 <td colSpan={tableColumns.length + (showCheckboxes ? 1 : 0)} className="text-center p-4">
+//                 <td colSpan={tableColumns.length + 1} className="text-center">
 //                   No data available
 //                 </td>
 //               </tr>
@@ -208,21 +376,117 @@
 //   );
 // };
 
-import React, { useState } from "react";
+// export default TableComponent;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect, useRef } from "react";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 
-const TableComponent = ({ data, columns }) => {
-  const [tableData, setTableData] = useState(data || []);
-  const [tableColumns, setTableColumns] = useState(columns || []);
-  const [showRowCheckboxes, setShowRowCheckboxes] = useState(false); // Toggle for row checkboxes
-  const [showColumnCheckboxes, setShowColumnCheckboxes] = useState(false); // Toggle for column checkboxes
+const TableComponent = ({ value, onChange }) => {
+  const [tableData, setTableData] = useState(() => {
+    // Try to get table data from sessionStorage or fall back to the default value
+    const savedData = sessionStorage.getItem("tableData");
+    return savedData
+      ? JSON.parse(savedData)
+      : value.data || [
+          { id: 1, name: "John Doe", age: 28 },
+          { id: 2, name: "Jane Smith", age: 32 },
+        ];
+  });
+
+  const [tableColumns, setTableColumns] = useState(() => {
+    // Try to get table columns from sessionStorage or fall back to the default value
+    const savedColumns = sessionStorage.getItem("tableColumns");
+    return savedColumns
+      ? JSON.parse(savedColumns)
+      : value.columns || [
+          { accessorKey: "id", header: "ID", width: 150 },
+          { accessorKey: "name", header: "Name", width: 150 },
+          { accessorKey: "age", header: "Age", width: 100 },
+        ];
+  });
+
+  const [showRowCheckboxes, setShowRowCheckboxes] = useState(false);
+  const [showColumnCheckboxes, setShowColumnCheckboxes] = useState(false);
   const [selectedRows, setSelectedRows] = useState(new Set());
-  const [selectedColumnsForRemoval, setSelectedColumnsForRemoval] = useState(new Set());
+  const [selectedColumnsForRemoval, setSelectedColumnsForRemoval] = useState(
+    new Set()
+  );
   const [selectedCell, setSelectedCell] = useState(null);
   const [textColor, setTextColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
-
   const [cellStyles, setCellStyles] = useState({});
+
+  const resizingColumn = useRef(null);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+
+  const handleMouseDown = (e, columnIndex) => {
+    e.preventDefault();
+    resizingColumn.current = columnIndex;
+    startX.current = e.clientX;
+    startWidth.current = tableColumns[columnIndex].width;
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseMove = (e) => {
+    if (resizingColumn.current === null) return;
+
+    const diff = e.clientX - startX.current;
+    const newWidth = startWidth.current + diff;
+    if (newWidth > 10) {
+      const updatedColumns = [...tableColumns];
+      updatedColumns[resizingColumn.current] = {
+        ...updatedColumns[resizingColumn.current],
+        width: newWidth,
+      };
+      setTableColumns(updatedColumns);
+    }
+  };
+
+  const handleMouseUp = () => {
+    resizingColumn.current = null;
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  useEffect(() => {
+    // Save tableData and tableColumns to sessionStorage when they change
+    sessionStorage.setItem("tableData", JSON.stringify(tableData));
+    sessionStorage.setItem("tableColumns", JSON.stringify(tableColumns));
+
+    if (onChange) {
+      onChange({ data: tableData, columns: tableColumns });
+    }
+  }, [tableData, tableColumns, onChange]);
 
   const table = useReactTable({
     data: tableData,
@@ -249,12 +513,12 @@ const TableComponent = ({ data, columns }) => {
     const newColumn = {
       accessorKey: newColumnKey,
       header: newColumnKey,
+      width: 150,
     };
     setTableColumns([...tableColumns, newColumn]);
     setTableData(tableData.map((row) => ({ ...row, [newColumnKey]: "" })));
   };
 
-  // Toggle row selection mode
   const toggleRowRemoveMode = () => {
     if (showRowCheckboxes) {
       setTableData(tableData.filter((_, index) => !selectedRows.has(index)));
@@ -263,7 +527,6 @@ const TableComponent = ({ data, columns }) => {
     setShowRowCheckboxes(!showRowCheckboxes);
   };
 
-  // Handle checkbox change for rows to remove
   const handleRowCheckboxChange = (index) => {
     const updatedSelection = new Set(selectedRows);
     if (updatedSelection.has(index)) {
@@ -291,27 +554,29 @@ const TableComponent = ({ data, columns }) => {
     setSelectedColumnsForRemoval(updatedSelection);
   };
 
-  // Remove selected columns from tableColumns and tableData
   const removeSelectedColumns = () => {
     const columnsToRemove = Array.from(selectedColumnsForRemoval);
-
-    // Remove the columns from tableColumns
+    
+    // Update the columns
     const updatedColumns = tableColumns.filter(
       (col) => !columnsToRemove.includes(col.accessorKey)
     );
-
-    // Remove the corresponding columns from tableData
+  
+    // Update the data to remove the columns that were removed
     const updatedData = tableData.map((row) => {
       const updatedRow = { ...row };
       columnsToRemove.forEach((colId) => {
-        delete updatedRow[colId];
+        delete updatedRow[colId]; // Remove the column data from each row
       });
       return updatedRow;
     });
-
+  
+    // Update the state for columns and data
     setTableColumns(updatedColumns);
     setTableData(updatedData);
-    setSelectedColumnsForRemoval(new Set()); // Clear the selected columns after removal
+  
+    // Reset the selected columns for removal
+    setSelectedColumnsForRemoval(new Set());
   };
 
   const handleCellClick = (rowIndex, columnId) => {
@@ -321,12 +586,10 @@ const TableComponent = ({ data, columns }) => {
   const applyTextColor = () => {
     if (selectedCell) {
       const { rowIndex, columnId } = selectedCell;
-
-      // Update only the color (text) style without affecting borders
       const newStyles = { ...cellStyles };
       newStyles[`${rowIndex}-${columnId}`] = {
         ...newStyles[`${rowIndex}-${columnId}`],
-        color: textColor, // Apply text color only
+        color: textColor,
       };
       setCellStyles(newStyles);
     }
@@ -335,12 +598,10 @@ const TableComponent = ({ data, columns }) => {
   const applyBgColor = () => {
     if (selectedCell) {
       const { rowIndex, columnId } = selectedCell;
-
-      // Update only the background color without affecting borders
       const newStyles = { ...cellStyles };
       newStyles[`${rowIndex}-${columnId}`] = {
         ...newStyles[`${rowIndex}-${columnId}`],
-        backgroundColor: bgColor, // Apply background color only
+        backgroundColor: bgColor,
       };
       setCellStyles(newStyles);
     }
@@ -353,7 +614,7 @@ const TableComponent = ({ data, columns }) => {
   };
 
   return (
-    <div className="w-screen h-screen p-4 flex flex-col items-center bg-gray-100">
+    <div className="p-4" style={{ position: "absolute", top: "0", left: "0" }}>
       {/* Controls */}
       <div className="mb-4 flex gap-4 border p-2">
         <input
@@ -392,31 +653,43 @@ const TableComponent = ({ data, columns }) => {
         >
           Add Column
         </button>
-        {/* Toggle for removing rows */}
         <button
           onClick={toggleRowRemoveMode}
           className={`px-4 py-2 rounded-lg shadow ${
-            showRowCheckboxes ? "bg-red-500 text-white" : "bg-gray-500 text-white"
+            showRowCheckboxes
+              ? "bg-red-500 text-white"
+              : "bg-gray-500 text-white"
           }`}
         >
           {showRowCheckboxes ? "Confirm Remove Row" : "Remove Row"}
         </button>
-        {/* Toggle for removing columns */}
         <button
-          onClick={toggleColumnRemoveMode}
-          className={`px-4 py-2 rounded-lg shadow ${
-            showColumnCheckboxes ? "bg-red-500 text-white" : "bg-gray-500 text-white"
-          }`}
-        >
-          {showColumnCheckboxes ? "Confirm Remove Column" : "Remove Column"}
-        </button>
+  onClick={() => {
+    // Toggle between selection mode and confirmation mode
+    setShowColumnCheckboxes(!showColumnCheckboxes);
+    
+    if (showColumnCheckboxes) {
+      // If we were in "confirmation" mode, remove selected columns
+      removeSelectedColumns();
+    }
+  }}
+  className={`px-4 py-2 rounded-lg shadow ${
+    showColumnCheckboxes ? "bg-red-500 text-white" : "bg-gray-500 text-white"
+  }`}
+>
+  {showColumnCheckboxes ? "Confirm Remove Column" : "Remove Column"}
+</button>
+
+
       </div>
 
       {/* Table */}
-      <div className="w-full overflow-x-auto">
-        <table className="w-full border-collapse border border-black">
+      <div className="overflow-x-auto w-full">
+        <table
+          className="table-auto border-collapse border border-black"
+          style={{ minWidth: "max-content" }}
+        >
           <thead>
-            {/* Row for Column Selection Checkboxes */}
             {showColumnCheckboxes && (
               <tr className="bg-gray-200">
                 {tableColumns.map((col) => (
@@ -424,25 +697,26 @@ const TableComponent = ({ data, columns }) => {
                     <input
                       type="checkbox"
                       checked={selectedColumnsForRemoval.has(col.accessorKey)}
-                      onChange={() => handleColumnCheckboxChange(col.accessorKey)}
+                      onChange={() =>
+                        handleColumnCheckboxChange(col.accessorKey)
+                      }
                     />
                   </th>
                 ))}
               </tr>
             )}
-            {/* Editable Column Headers */}
             <tr className="bg-gray-200">
-              {/* Add a header for row removal */}
               {showRowCheckboxes && (
                 <th className="border p-2 text-center">
-                  <input
-                    type="checkbox"
-                    className="cursor-pointer"
-                  />
+                  <input type="checkbox" className="cursor-pointer" />
                 </th>
               )}
               {tableColumns.map((col, index) => (
-                <th key={col.accessorKey} className="border p-2">
+                <th
+                  key={col.accessorKey}
+                  className="border p-2 relative"
+                  style={{ width: `${col.width}px` }}
+                >
                   <input
                     type="text"
                     value={col.header}
@@ -450,6 +724,14 @@ const TableComponent = ({ data, columns }) => {
                       handleColumnHeaderEdit(index, e.target.value)
                     }
                     className="w-full bg-transparent border-none focus:outline-none"
+                  />
+                  <div
+                    className="absolute right-0 top-0 bottom-0 cursor-ew-resize"
+                    style={{
+                      width: "5px",
+                      backgroundColor: "transparent",
+                    }}
+                    onMouseDown={(e) => handleMouseDown(e, index)}
                   />
                 </th>
               ))}
@@ -459,7 +741,6 @@ const TableComponent = ({ data, columns }) => {
             {tableData.length > 0 ? (
               tableData.map((row, rowIndex) => (
                 <tr key={rowIndex}>
-                  {/* Checkbox for row removal */}
                   {showRowCheckboxes && (
                     <td className="border p-2 text-center">
                       <input
@@ -469,11 +750,16 @@ const TableComponent = ({ data, columns }) => {
                       />
                     </td>
                   )}
-                  {/* Table Data Cells */}
                   {tableColumns.map((col) => (
                     <td
                       key={col.accessorKey}
-                      className="border p-2 cursor-pointer"
+                      className={`border p-2 cursor-pointer ${
+                        selectedCell &&
+                        selectedCell.rowIndex === rowIndex &&
+                        selectedCell.columnId === col.accessorKey
+                          ? "bg-blue-100"
+                          : ""
+                      }`}
                       style={cellStyles[`${rowIndex}-${col.accessorKey}`] || {}}
                       onClick={() => handleCellClick(rowIndex, col.accessorKey)}
                     >
@@ -481,7 +767,11 @@ const TableComponent = ({ data, columns }) => {
                         type="text"
                         value={row[col.accessorKey] || ""}
                         onChange={(e) =>
-                          handleCellEdit(rowIndex, col.accessorKey, e.target.value)
+                          handleCellEdit(
+                            rowIndex,
+                            col.accessorKey,
+                            e.target.value
+                          )
                         }
                         className="w-full bg-transparent border-none focus:outline-none"
                       />
@@ -497,10 +787,11 @@ const TableComponent = ({ data, columns }) => {
               </tr>
             )}
           </tbody>
-        </table>  
+        </table>
       </div>
     </div>
   );
 };
 
 export default TableComponent;
+
