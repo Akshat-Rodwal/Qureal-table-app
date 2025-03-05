@@ -1,4 +1,3 @@
-// // old code
 import React, { useState, useEffect, useRef } from "react";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import styles from './TableComponent.module.css';
@@ -40,13 +39,11 @@ const TableComponent = ({ value, onChange }) => {
   const [textColor, setTextColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
 
-
-
-  
+  const tableRef = useRef(null);
+  const resizing = useRef(false);
   const resizingColumn = useRef(null);
   const startX = useRef(0);
   const startWidth = useRef(0);
-
   const [draggedColumn, setDraggedColumn] = useState(null);
 
   // Handle column drag start
@@ -66,9 +63,7 @@ const TableComponent = ({ value, onChange }) => {
     if (draggedIndex === index) return;
 
     const newColumns = [...tableColumns];
-
     const [draggedColumnItem] = newColumns.splice(draggedIndex, 1);
-
     newColumns.splice(index, 0, draggedColumnItem);
 
     setTableColumns(newColumns);
@@ -104,6 +99,30 @@ const TableComponent = ({ value, onChange }) => {
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
   };
+
+  // Add the following logic for the X-direction resizing
+const handleMouseDown2 = (e) => {
+  resizing.current = true;
+  startX.current = e.clientX;
+  startWidth.current = tableRef.current.offsetWidth;
+  document.addEventListener("mousemove", handleMouseMove2);
+  document.addEventListener("mouseup", handleMouseUp2);
+};
+
+const handleMouseMove2 = (e) => {
+  if (resizing.current) {
+    const diff = e.clientX - startX.current;
+    const newWidth = Math.max(400, startWidth.current + diff); // Ensure a minimum width of 400px
+    tableRef.current.style.width = `${newWidth}px`;
+  }
+};
+
+const handleMouseUp2 = () => {
+  resizing.current = false;
+  document.removeEventListener("mousemove", handleMouseMove2);
+  document.removeEventListener("mouseup", handleMouseUp2);
+};
+
 
   useEffect(() => {
     sessionStorage.setItem("tableData", JSON.stringify(tableData));
@@ -233,7 +252,6 @@ const TableComponent = ({ value, onChange }) => {
     setTableColumns(updatedColumns);
   };
 
-  // Add input box to edit the selected cell's value at the top
   const handleInputChange = (e) => {
     if (selectedCell) {
       const { rowIndex, columnId } = selectedCell;
@@ -245,8 +263,6 @@ const TableComponent = ({ value, onChange }) => {
 
   return (
     <div className={styles.container}>
-      {/* Input Box for Editing */}
-
       {/* Controls */}
       <div className={styles.controls}>
         <input
@@ -308,6 +324,7 @@ const TableComponent = ({ value, onChange }) => {
         </button>
       </div>
 
+      {/* Input Box for Editing */}
       {selectedCell && (
         <div className={styles.controls}>
           <input
@@ -321,7 +338,7 @@ const TableComponent = ({ value, onChange }) => {
       )}
 
       {/* Table */}
-      <div className={styles.tableContainer}>
+      <div className={styles.tableContainer} ref={tableRef}>
         <table className={styles.table}>
           <thead>
             {showColumnCheckboxes && (
@@ -423,170 +440,13 @@ const TableComponent = ({ value, onChange }) => {
             )}
           </tbody>
         </table>
+        <div
+          className={styles.tableResizeHandle}
+          onMouseDown={handleMouseDown2}
+        />
       </div>
     </div>
   );
 };
 
 export default TableComponent;
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState, useEffect, useRef } from "react";
-// import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
-// import styles from './TableComponent.module.css';
-
-// const TableComponent = ({ value, onChange }) => {
-//   const [tableData, setTableData] = useState(() => {
-//     const savedData = sessionStorage.getItem("tableData");
-//     return savedData
-//       ? JSON.parse(savedData)
-//       : value.data || [
-//           { id: 1, name: "John Doe", age: 28 },
-//           { id: 2, name: "Jane Smith", age: 32 },
-//         ];
-//   });
-
-//   const [tableColumns, setTableColumns] = useState(() => {
-//     const savedColumns = sessionStorage.getItem("tableColumns");
-//     return savedColumns
-//       ? JSON.parse(savedColumns)
-//       : value.columns || [
-//           { accessorKey: "id", header: "ID", width: 150 },
-//           { accessorKey: "name", header: "Name", width: 150 },
-//           { accessorKey: "age", header: "Age", width: 100 },
-//         ];
-//   });
-
-//   const tableRef = useRef(null);
-//   const resizing = useRef(false);
-//   const startX = useRef(0);
-//   const startWidth = useRef(0);
-
-//   // Table resize functionality (X-direction)
-//   const handleMouseDown = (e) => {
-//     resizing.current = true;
-//     startX.current = e.clientX;
-//     startWidth.current = tableRef.current.offsetWidth;
-//     document.addEventListener("mousemove", handleMouseMove);
-//     document.addEventListener("mouseup", handleMouseUp);
-//   };
-
-//   const handleMouseMove = (e) => {
-//     if (resizing.current) {
-//       const diff = e.clientX - startX.current;
-//       const newWidth = Math.max(400, startWidth.current + diff); // Ensure a minimum width of 400px
-//       tableRef.current.style.width = `${newWidth}px`;
-//     }
-//   };
-
-//   const handleMouseUp = () => {
-//     resizing.current = false;
-//     document.removeEventListener("mousemove", handleMouseMove);
-//     document.removeEventListener("mouseup", handleMouseUp);
-//   };
-
-//   const handleCellEdit = (rowIndex, columnId, value) => {
-//     const updatedData = [...tableData];
-//     updatedData[rowIndex] = { ...updatedData[rowIndex], [columnId]: value };
-//     setTableData(updatedData);
-//   };
-
-//   const addRow = () => {
-//     const newRow = tableColumns.reduce((acc, col) => {
-//       acc[col.accessorKey] = "";
-//       return acc;
-//     }, {});
-//     setTableData([...tableData, newRow]);
-//   };
-
-//   const addColumn = () => {
-//     const newColumnKey = `column${tableColumns.length + 1}`;
-//     const newColumn = {
-//       accessorKey: newColumnKey,
-//       header: newColumnKey,
-//       width: 150,
-//     };
-//     setTableColumns([...tableColumns, newColumn]);
-//     setTableData(tableData.map((row) => ({ ...row, [newColumnKey]: "" })));
-//   };
-
-//   useEffect(() => {
-//     sessionStorage.setItem("tableData", JSON.stringify(tableData));
-//     sessionStorage.setItem("tableColumns", JSON.stringify(tableColumns));
-//     if (onChange) {
-//       onChange({ data: tableData, columns: tableColumns });
-//     }
-//   }, [tableData, tableColumns, onChange]);
-
-//   return (
-//     <div className={styles.container}>
-//       <div className={styles.controls}>
-//         <button onClick={addRow} className={`${styles.button} ${styles.buttonBlue}`}>
-//           Add Row
-//         </button>
-//         <button onClick={addColumn} className={`${styles.button} ${styles.buttonPurple}`}>
-//           Add Column
-//         </button>
-//       </div>
-
-//       <div className={styles.tableWrapper}>
-//         <table ref={tableRef} className={styles.table}>
-//           <thead>
-//             <tr className={styles.tableHeader}>
-//               {tableColumns.map((col) => (
-//                 <th
-//                   key={col.accessorKey}
-//                   className={styles.tableHeaderCell}
-//                   style={{ width: `${col.width}px` }}
-//                 >
-//                   {col.header}
-//                 </th>
-//               ))}
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {tableData.length > 0 ? (
-//               tableData.map((row, rowIndex) => (
-//                 <tr key={rowIndex}>
-//                   {tableColumns.map((col) => (
-//                     <td key={col.accessorKey} className={styles.tableCell}>
-//                       <input
-//                         type="text"
-//                         value={row[col.accessorKey] || ""}
-//                         onChange={(e) =>
-//                           handleCellEdit(rowIndex, col.accessorKey, e.target.value)
-//                         }
-//                         className={styles.cellInput}
-//                       />
-//                     </td>
-//                   ))}
-//                 </tr>
-//               ))
-//             ) : (
-//               <tr>
-//                 <td colSpan={tableColumns.length + 1} className="text-center">
-//                   No data available
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//         <div
-//           className={styles.tableResizeHandle}
-//           onMouseDown={handleMouseDown}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TableComponent;

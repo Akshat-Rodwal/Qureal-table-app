@@ -1,4 +1,4 @@
-TableComponent.module.css
+/* Container for the whole component */
 .container {
   padding: 16px;
   position: absolute;
@@ -6,14 +6,15 @@ TableComponent.module.css
   left: 0;
 }
 
+/* Controls at the top of the table */
 .controls {
   margin-bottom: 16px;
   display: flex;
   gap: 16px;
-  /* border: 1px solid; */
   padding: 8px;
 }
 
+/* Color Picker Styles */
 .colorPicker {
   width: 40px;
   height: 40px;
@@ -21,6 +22,7 @@ TableComponent.module.css
   border-radius: 8px;
 }
 
+/* General Button Styles */
 .button {
   padding: 8px 16px;
   border-radius: 8px;
@@ -28,6 +30,7 @@ TableComponent.module.css
   cursor: pointer;
 }
 
+/* Specific Button Styles */
 .buttonGreen {
   background-color: #48bb78;
   color: white;
@@ -53,52 +56,71 @@ TableComponent.module.css
   color: white;
 }
 
+/* Input field for editing cell */
 .input {
   border: 1px solid #d1d5db;
   padding: 8px;
-  
   width: 800px;
 }
 
+/* Table Container (overflowing horizontally) */
 .tableContainer {
   overflow-x: auto;
   width: 100%;
+  position: relative;
 }
 
+/* Table Styling */
 .table {
   border-collapse: collapse;
-  border: 1px solid black;
-  min-width: max-content;
+  width: 100%;
+  min-width: 400px;
+  border: 1px solid #ddd;
 }
 
+/* Header Row Styling */
 .tableHeader {
   background-color: #edf2f7;
 }
 
 .tableHeaderCell {
-  padding: 8px;
+  padding: 10px;
+  background-color: #f4f4f4;
+  text-align: center;
+  border: 1px solid #ddd;
   position: relative;
-  border: 1px solid black;
 }
 
+/* Table Cells */
 .tableCell {
-  padding: 8px;
+  padding: 10px;
   cursor: pointer;
-  border: 1px solid black;
+  border: 1px solid #ddd;
 }
 
 .cellSelected {
   background-color: #d0e6f4;
 }
 
+/* Checkbox Container Styling */
 .checkboxContainer {
   text-align: center;
 }
 
+/* Checkbox Styles */
 .checkbox {
   cursor: pointer;
 }
 
+/* Cell Input (text) */
+.cellInput {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+/* Resizing Handle for Columns */
 .resizeHandle {
   position: absolute;
   right: 0;
@@ -109,15 +131,7 @@ TableComponent.module.css
   background-color: transparent;
 }
 
-.cellInput {
-  width: 100%;
-  background-color: transparent;
-  border: none;
-  outline: none;
-}
-
-
-/* Table resize handle */
+/* Resizing Handle for Table (X direction) */
 .tableResizeHandle {
   position: absolute;
   right: 0;
@@ -126,64 +140,28 @@ TableComponent.module.css
   height: 10px;
   background-color: #000;
   cursor: se-resize;
+  z-index: 10; /* Ensure it’s above the table content */
 }
 
-
-
-
-
-
-/* new x direction resizing  */
-
-
-/* .tableWrapper {
+/* Wrapper for Table Resizing */
+.tableWrapper {
   position: relative;
   display: inline-block;
   overflow: hidden;
 }
 
-
+/* Adjusting Table Layout */
 .table {
-  border-collapse: collapse;
   width: 100%;
-  min-width: 400px; 
+  min-width: 400px;
 }
 
-.tableHeaderCell {
-  padding: 10px;
-  background-color: #f4f4f4;
-  text-align: center;
-  border: 1px solid #ddd;
-}
-
-.tableCell {
-  padding: 10px;
-  border: 1px solid #ddd;
-}
-
-.cellInput {
-  width: 100%;
-  border: none;
-  padding: 5px;
-  box-sizing: border-box;
-}
-
-
-.tableResizeHandle {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 10px;
-  height: 10px;
-  background-color: #000;
-  cursor: se-resize;
-}
-
-
+/* Controls Spacing */
 .controls {
   margin-bottom: 10px;
 }
 
+/* Button Styles */
 .button {
   padding: 5px 10px;
   margin: 0 5px;
@@ -198,4 +176,4 @@ TableComponent.module.css
 .buttonPurple {
   background-color: #9c27b0;
   color: white;
-} */
+}
