@@ -1,0 +1,201 @@
+TableComponent.module.css
+.container {
+  padding: 16px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.controls {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  /* border: 1px solid; */
+  padding: 8px;
+}
+
+.colorPicker {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.buttonGreen {
+  background-color: #48bb78;
+  color: white;
+}
+
+.buttonYellow {
+  background-color: #f6e05e;
+  color: white;
+}
+
+.buttonBlue {
+  background-color: #4299e1;
+  color: white;
+}
+
+.buttonPurple {
+  background-color: #9f7aea;
+  color: white;
+}
+
+.buttonGray {
+  background-color: #a0aec0;
+  color: white;
+}
+
+.input {
+  border: 1px solid #d1d5db;
+  padding: 8px;
+  
+  width: 800px;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table {
+  border-collapse: collapse;
+  border: 1px solid black;
+  min-width: max-content;
+}
+
+.tableHeader {
+  background-color: #edf2f7;
+}
+
+.tableHeaderCell {
+  padding: 8px;
+  position: relative;
+  border: 1px solid black;
+}
+
+.tableCell {
+  padding: 8px;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.cellSelected {
+  background-color: #d0e6f4;
+}
+
+.checkboxContainer {
+  text-align: center;
+}
+
+.checkbox {
+  cursor: pointer;
+}
+
+.resizeHandle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: ew-resize;
+  width: 5px;
+  background-color: transparent;
+}
+
+.cellInput {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+
+/* Table resize handle */
+.tableResizeHandle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #000;
+  cursor: se-resize;
+}
+
+
+
+
+
+
+/* new x direction resizing  */
+
+
+/* .tableWrapper {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 400px; 
+}
+
+.tableHeaderCell {
+  padding: 10px;
+  background-color: #f4f4f4;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.tableCell {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.cellInput {
+  width: 100%;
+  border: none;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+
+.tableResizeHandle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #000;
+  cursor: se-resize;
+}
+
+
+.controls {
+  margin-bottom: 10px;
+}
+
+.button {
+  padding: 5px 10px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.buttonBlue {
+  background-color: #4caf50;
+  color: white;
+}
+
+.buttonPurple {
+  background-color: #9c27b0;
+  color: white;
+} */
