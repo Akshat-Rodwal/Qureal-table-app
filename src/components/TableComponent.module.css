@@ -140,7 +140,7 @@
   height: 10px;
   background-color: #000;
   cursor: se-resize;
-  z-index: 10; /* Ensure it’s above the table content */
+  z-index: 10 ; /* Ensure it’s above the table content */
 }
 
 /* Wrapper for Table Resizing */
@@ -177,3 +177,33 @@
   background-color: #9c27b0;
   color: white;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
