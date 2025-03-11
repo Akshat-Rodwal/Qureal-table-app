@@ -182,28 +182,52 @@
 
 
 
+/* new */
+.tableContainer {
+  overflow-x: auto; /* Ensures horizontal scrolling when the table overflows */
+  width: 100%; /* Set the width to 100% */
+  max-width: 100%; /* Ensure it doesn't overflow beyond the container */
+}
+
+.table {
+  width: 100%; /* Make the table take the full width of its container */
+  table-layout: fixed; /* Prevents table from resizing based on content */
+  min-width: 200px; /* Prevents table from shrinking too small */
+}
+
+.tableResizeHandle {
+  width: 10px; /* Width of the resize handle */
+  cursor: ew-resize; /* Use resize cursor for resizing */
+  background-color: lightgray;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 20px; /* Height for the resize handle */
+}
 
 
+/* Input field for editing cell */
+.inputEditor{
+  border: 1px solid #d1d5db;
+  padding: 8px;
+  width: 285px;
+  margin-bottom: 20px;
+}
 
+/* Ensure the table container doesn't cause overflow */
+.tableContainer {
+  overflow-x: auto; /* Add horizontal scroll if table overflows */
+  max-width: 100%;
+  display: block;
+}
 
+/* Ensure table cells and headers handle overflow correctly */
+.table th, .table td {
+  overflow: hidden; /* Hide overflow */
+  text-overflow: clip; /* Add ellipsis for overflowing text */
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* Optional: Add specific styles for column resizing if necessary */
+.table th {
+  min-width: 100px; /* Set minimum width for header columns */
+}

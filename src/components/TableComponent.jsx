@@ -455,6 +455,10 @@
 
 
 
+
+
+
+
 import React, { useState, useEffect, useCallback } from "react";
 import {
   createColumnHelper,
@@ -519,10 +523,18 @@ const TableComponent = ({ value, onChange }) => {
     enableColumnResizing: true, // Enable column resizing
   });
 
-  // Handle resizing the entire table
   const handleTableResize = useCallback((e) => {
-    const newWidth = `${e.clientX}px`;
-    setTableWidth(newWidth);
+    // Get the width of the table and restrict the resizing range
+    const minWidth = 290; // Minimum width of the table
+    const maxWidth = window.innerWidth * 0.9; // Maximum width of the table (90% of window width)
+
+    let newWidth = e.clientX;
+
+    // Restrict width between minWidth and maxWidth
+    if (newWidth < minWidth) newWidth = minWidth;
+    if (newWidth > maxWidth) newWidth = maxWidth;
+
+    setTableWidth(`${newWidth}px`);
   }, []);
 
   const stopResize = () => {
@@ -542,7 +554,11 @@ const TableComponent = ({ value, onChange }) => {
     setTableData(updatedData);
 
     // If the selected cell is the same as the one being edited, update the input editor too
-    if (selectedCell && selectedCell.rowIndex === rowIndex && selectedCell.columnId === columnId) {
+    if (
+      selectedCell &&
+      selectedCell.rowIndex === rowIndex &&
+      selectedCell.columnId === columnId
+    ) {
       setSelectedValue(value);
     }
   };
@@ -732,13 +748,14 @@ const TableComponent = ({ value, onChange }) => {
                       <input
                         type="checkbox"
                         checked={selectedColumns.has(header.id)}
-                        onChange={() =>
-                          handleColumnCheckboxChange(header.id)
-                        }
+                        onChange={() => handleColumnCheckboxChange(header.id)}
                       />
                     )}
                     {!header.isPlaceholder &&
-                      flexRender(header.column.columnDef.header, header.getContext())}
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                     <div
                       {...header.getResizeHandler()}
                       style={{
@@ -776,7 +793,11 @@ const TableComponent = ({ value, onChange }) => {
                       type="text"
                       value={cell.getValue() || ""}
                       onChange={(e) =>
-                        handleCellEdit(row.index, cell.column.id, e.target.value)
+                        handleCellEdit(
+                          row.index,
+                          cell.column.id,
+                          e.target.value
+                        )
                       }
                       className={styles.cellInput}
                     />
